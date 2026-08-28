@@ -22,11 +22,11 @@ Gerardo González
 
 Al tratarse de un proyecto individual, una misma persona asumirá los diferentes roles:
 
-- **Product Owner:** TU NOMBRE
-- **Tech Lead:** TU NOMBRE
-- **DevSecOps Lead:** TU NOMBRE
-- **AI/Data Lead:** TU NOMBRE
-- **QA Lead:** TU NOMBRE
+- **Product Owner:** 
+- **Tech Lead:** 
+- **DevSecOps Lead:** 
+- **AI/Data Lead:** 
+- **QA Lead:** 
 
 ### Product Owner
 Responsable de definir y priorizar los requisitos y mantener el backlog de AulaViva.
