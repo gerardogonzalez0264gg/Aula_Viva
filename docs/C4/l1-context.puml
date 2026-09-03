@@ -1,18 +1,14 @@
-@startuml AulaViva-C4-L1
-
+@startuml
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
 
-title AulaViva - C4 Nivel 1 - Contexto
+Person(estudiante, "Estudiante")
+Person(docente, "Docente")
 
-Person(docente, "Docente", "Gestiona cursos, contenidos y evaluaciones.")
-Person(estudiante, "Estudiante", "Estudia, responde evaluaciones y utiliza el tutor IA.")
+System(aulaviva, "AulaViva", "Plataforma educativa con IA")
 
-System(aulaviva, "AulaViva", "Plataforma educativa SaaS multi-tenant con evaluaciones automáticas y tutor IA.")
+System_Ext(llm, "Servicio de IA", "Servicio externo de inteligencia artificial")
 
-System_Ext(llm, "Proveedor LLM", "Servicio externo de inteligencia artificial utilizado por el tutor IA.")
-
-Rel(docente, aulaviva, "Gestiona cursos, contenidos y evaluaciones")
-Rel(estudiante, aulaviva, "Consulta contenidos, responde evaluaciones y realiza preguntas")
-Rel(aulaviva, llm, "Envía consultas al tutor IA")
-
+Rel(estudiante, aulaviva, "Utiliza")
+Rel(docente, aulaviva, "Gestiona cursos y evaluaciones")
+Rel(aulaviva, llm, "Consulta")
 @enduml
