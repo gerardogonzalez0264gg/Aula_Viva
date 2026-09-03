@@ -1,1 +1,27 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 
+Person(estudiante, "Estudiante")
+Person(docente, "Docente")
+
+System_Boundary(aulaviva, "AulaViva") {
+
+    Container(frontend, "Frontend Web", "React", "Interfaz de estudiantes y docentes")
+
+    Container(backend, "Backend", "Node.js", "Gestiona usuarios, cursos y evaluaciones")
+
+    ContainerDb(db, "Base de Datos", "PostgreSQL", "Almacena usuarios, cursos y evaluaciones")
+
+    Container(ai, "Servicio IA", "Python / RAG", "Tutor IA y generación de evaluaciones")
+}
+
+System_Ext(llm, "LLM", "Modelo de lenguaje externo")
+
+Rel(estudiante, frontend, "Utiliza")
+Rel(docente, frontend, "Utiliza")
+
+Rel(frontend, backend, "Solicita información")
+Rel(backend, db, "Lee y escribe")
+Rel(backend, ai, "Solicita funciones de IA")
+Rel(ai, llm, "Consulta")
+@enduml
