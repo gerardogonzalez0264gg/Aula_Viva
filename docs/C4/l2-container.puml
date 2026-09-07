@@ -10,7 +10,7 @@ System_Boundary(aulaviva, "AulaViva") {
 
     Container(backend, "Backend", "Node.js", "Gestiona usuarios, cursos y evaluaciones")
 
-    ContainerDb(db, "Base de Datos", "PostgreSQL", "Almacena usuarios, cursos y evaluaciones")
+    ContainerDb(db, "Base de Datos", "PostgreSQL (Cloud SQL)", "Almacena usuarios, cursos y evaluaciones")
 
     Container(ai, "Servicio IA", "Python / RAG", "Tutor IA y generación de evaluaciones")
 }
