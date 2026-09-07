@@ -1,0 +1,14 @@
+@startuml
+!include <C4/C4_Context>
+
+Person(estudiante, "Estudiante")
+Person(docente, "Docente")
+
+System(aulaviva, "AulaViva", "Plataforma educativa con IA")
+
+System_Ext(llm, "Servicio de IA", "Servicio externo de inteligencia artificial")
+
+Rel(estudiante, aulaviva, "Utiliza")
+Rel(docente, aulaviva, "Gestiona cursos y evaluaciones")
+Rel(aulaviva, llm, "Consulta")
+@enduml

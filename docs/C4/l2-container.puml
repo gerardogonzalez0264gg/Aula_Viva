@@ -1,0 +1,27 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(estudiante, "Estudiante")
+Person(docente, "Docente")
+
+System_Boundary(aulaviva, "AulaViva") {
+
+    Container(frontend, "Frontend Web", "React (Vercel)", "Interfaz de estudiantes y docentes")
+
+    Container(backend, "Backend", "Node.js (Cloud Run)", "Gestiona usuarios, cursos y evaluaciones")
+
+    ContainerDb(db, "Base de Datos", "PostgreSQL (Cloud SQL)", "Almacena usuarios, cursos y evaluaciones")
+
+    Container(ai, "Servicio IA", "Python / RAG (Cloud Run + Vertex AI)", "Tutor IA y generación de evaluaciones")
+}
+
+System_Ext(llm, "LLM", "Modelo de lenguaje externo")
+
+Rel(estudiante, frontend, "Utiliza")
+Rel(docente, frontend, "Utiliza")
+
+Rel(frontend, backend, "Solicita información")
+Rel(backend, db, "Lee y escribe")
+Rel(backend, ai, "Solicita funciones de IA")
+Rel(ai, llm, "Consulta")
+@enduml
