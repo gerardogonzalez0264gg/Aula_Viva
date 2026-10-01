@@ -11,62 +11,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Obtener cursos */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Lista de cursos */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Course"][];
-                    };
-                };
-                401: components["responses"]["Unauthorized"];
-            };
-        };
+        /**
+         * Obtener cursos
+         * @description Obtiene la lista de cursos disponibles en AulaViva.
+         */
+        get: operations["getCourses"];
         put?: never;
-        /** Crear curso */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    /**
-                     * @example {
-                     *       "name": "Biología",
-                     *       "description": "Curso de Biología General"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["CreateCourseRequest"];
-                };
-            };
-            responses: {
-                /** @description Curso creado */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Course"];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-            };
-        };
+        /**
+         * Crear curso
+         * @description Crea un nuevo curso en AulaViva.
+         */
+        post: operations["createCourse"];
         delete?: never;
         options?: never;
         head?: never;
@@ -80,31 +35,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Obtener un curso */
-        get: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    /** @description Identificador del curso */
-                    courseId: components["parameters"]["CourseId"];
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Curso encontrado */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Course"];
-                    };
-                };
-                404: components["responses"]["NotFound"];
-            };
-        };
+        /**
+         * Obtener un curso
+         * @description Obtiene la información de un curso específico mediante su identificador.
+         */
+        get: operations["getCourseById"];
         put?: never;
         post?: never;
         delete?: never;
@@ -122,43 +57,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Matricular usuario en un curso */
-        post: {
-            parameters: {
-                query?: never;
-                header: {
-                    "Idempotency-Key": string;
-                };
-                path: {
-                    /** @description Identificador del curso */
-                    courseId: components["parameters"]["CourseId"];
-                };
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    /**
-                     * @example {
-                     *       "userId": "user-001"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["EnrollmentRequest"];
-                };
-            };
-            responses: {
-                /** @description Matrícula creada */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Enrollment"];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                404: components["responses"]["NotFound"];
-            };
-        };
+        /**
+         * Matricular usuario en un curso
+         * @description Crea una matrícula de un usuario en un curso específico.
+         */
+        post: operations["createEnrollment"];
         delete?: never;
         options?: never;
         head?: never;
@@ -174,39 +77,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Crear evaluación */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    /**
-                     * @example {
-                     *       "courseId": "course-001",
-                     *       "title": "Evaluación Unidad 1"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["CreateEvaluationRequest"];
-                };
-            };
-            responses: {
-                /** @description Evaluación creada */
-                201: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Evaluation"];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-            };
-        };
+        /**
+         * Crear evaluación
+         * @description Crea una nueva evaluación asociada a un curso.
+         */
+        post: operations["createEvaluation"];
         delete?: never;
         options?: never;
         head?: never;
@@ -222,48 +97,11 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Realizar una pregunta al Tutor IA */
-        post: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody: {
-                content: {
-                    /**
-                     * @example {
-                     *       "courseId": "course-001",
-                     *       "question": "¿Qué es la fotosíntesis?"
-                     *     }
-                     */
-                    "application/json": components["schemas"]["TutorQuestionRequest"];
-                };
-            };
-            responses: {
-                /** @description Respuesta generada por el Tutor IA */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        /**
-                         * @example {
-                         *       "answer": "La fotosíntesis es el proceso mediante el cual las plantas producen energía.",
-                         *       "sources": [
-                         *         "Biología - Unidad 1",
-                         *         "Material del curso"
-                         *       ]
-                         *     }
-                         */
-                        "application/json": components["schemas"]["TutorQuestionResponse"];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-            };
-        };
+        /**
+         * Realizar una pregunta al Tutor IA
+         * @description Envía una pregunta al Tutor IA utilizando información del curso y fuentes disponibles mediante RAG.
+         */
+        post: operations["askTutorQuestion"];
         delete?: never;
         options?: never;
         head?: never;
@@ -319,7 +157,7 @@ export interface components {
         };
     };
     responses: {
-        /** @description Solicitud inválida */
+        /** @description Solicitud inválida. */
         BadRequest: {
             headers: {
                 [name: string]: unknown;
@@ -328,7 +166,7 @@ export interface components {
                 "application/problem+json": components["schemas"]["Error"];
             };
         };
-        /** @description No autorizado */
+        /** @description No autorizado. */
         Unauthorized: {
             headers: {
                 [name: string]: unknown;
@@ -337,7 +175,7 @@ export interface components {
                 "application/problem+json": components["schemas"]["Error"];
             };
         };
-        /** @description Recurso no encontrado */
+        /** @description Recurso no encontrado. */
         NotFound: {
             headers: {
                 [name: string]: unknown;
@@ -348,7 +186,7 @@ export interface components {
         };
     };
     parameters: {
-        /** @description Identificador del curso */
+        /** @description Identificador del curso. */
         CourseId: string;
     };
     requestBodies: never;
@@ -356,4 +194,192 @@ export interface components {
     pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+    getCourses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Lista de cursos */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createCourse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "name": "Biología",
+                 *       "description": "Curso de Biología General"
+                 *     }
+                 */
+                "application/json": components["schemas"]["CreateCourseRequest"];
+            };
+        };
+        responses: {
+            /** @description Curso creado */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    getCourseById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Identificador del curso. */
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Curso encontrado */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createEnrollment: {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description Identificador utilizado para evitar la creación duplicada de una matrícula. */
+                "Idempotency-Key": string;
+            };
+            path: {
+                /** @description Identificador del curso. */
+                courseId: components["parameters"]["CourseId"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "userId": "user-001"
+                 *     }
+                 */
+                "application/json": components["schemas"]["EnrollmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Matrícula creada */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Enrollment"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    createEvaluation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "courseId": "course-001",
+                 *       "title": "Evaluación Unidad 1"
+                 *     }
+                 */
+                "application/json": components["schemas"]["CreateEvaluationRequest"];
+            };
+        };
+        responses: {
+            /** @description Evaluación creada */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Evaluation"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    askTutorQuestion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                /**
+                 * @example {
+                 *       "courseId": "course-001",
+                 *       "question": "¿Qué es la fotosíntesis?"
+                 *     }
+                 */
+                "application/json": components["schemas"]["TutorQuestionRequest"];
+            };
+        };
+        responses: {
+            /** @description Respuesta generada por el Tutor IA */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "answer": "La fotosíntesis es el proceso mediante el cual las plantas producen energía.",
+                     *       "sources": [
+                     *         "Biología - Unidad 1",
+                     *         "Material del curso"
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["TutorQuestionResponse"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+}
