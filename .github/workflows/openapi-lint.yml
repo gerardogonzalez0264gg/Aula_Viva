@@ -1,0 +1,26 @@
+name: OpenAPI Spectral Lint
+
+on:
+  push:
+    paths:
+      - 'api/openapi.yaml'
+      - '.spectral.yaml'
+  pull_request:
+    paths:
+      - 'api/openapi.yaml'
+      - '.spectral.yaml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Ejecutar Spectral
+        uses: stoplightio/spectral-action@latest
+        with:
+          file_glob: 'api/openapi.yaml'
+          spectral_ruleset: '.spectral.yaml'
