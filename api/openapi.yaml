@@ -1,1 +1,333 @@
+openapi: 3.1.0
 
+info:
+  title: AulaViva API
+  version: 1.0.0
+  description: API para la gestión de cursos, matrículas, evaluaciones y Tutor IA de AulaViva.
+
+servers:
+  - url: https://api.aulaviva.example.com/api/v1
+
+tags:
+  - name: Cursos
+  - name: Matrículas
+  - name: Evaluaciones
+  - name: Tutor IA
+
+paths:
+
+  /courses:
+    get:
+      tags:
+        - Cursos
+      summary: Obtener cursos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de cursos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Course'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags:
+        - Cursos
+      summary: Crear curso
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCourseRequest'
+            example:
+              name: Biología
+              description: Curso de Biología General
+      responses:
+        '201':
+          description: Curso creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /courses/{courseId}:
+    get:
+      tags:
+        - Cursos
+      summary: Obtener un curso
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+      responses:
+        '200':
+          description: Curso encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Course'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /courses/{courseId}/enrollments:
+    post:
+      tags:
+        - Matrículas
+      summary: Matricular usuario en un curso
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/CourseId'
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentRequest'
+            example:
+              userId: user-001
+      responses:
+        '201':
+          description: Matrícula creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Enrollment'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /evaluations:
+    post:
+      tags:
+        - Evaluaciones
+      summary: Crear evaluación
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvaluationRequest'
+            example:
+              courseId: course-001
+              title: Evaluación Unidad 1
+      responses:
+        '201':
+          description: Evaluación creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evaluation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tutor/questions:
+    post:
+      tags:
+        - Tutor IA
+      summary: Realizar una pregunta al Tutor IA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TutorQuestionRequest'
+            example:
+              courseId: course-001
+              question: ¿Qué es la fotosíntesis?
+      responses:
+        '200':
+          description: Respuesta generada por el Tutor IA
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TutorQuestionResponse'
+              example:
+                answer: La fotosíntesis es el proceso mediante el cual las plantas producen energía.
+                sources:
+                  - Biología - Unidad 1
+                  - Material del curso
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CourseId:
+      name: courseId
+      in: path
+      required: true
+      description: Identificador del curso
+      schema:
+        type: string
+
+  schemas:
+
+    Course:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+
+    CreateCourseRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+
+    EnrollmentRequest:
+      type: object
+      required:
+        - userId
+      properties:
+        userId:
+          type: string
+
+    Enrollment:
+      type: object
+      required:
+        - id
+        - userId
+        - courseId
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        courseId:
+          type: string
+
+    CreateEvaluationRequest:
+      type: object
+      required:
+        - courseId
+        - title
+      properties:
+        courseId:
+          type: string
+        title:
+          type: string
+
+    Evaluation:
+      type: object
+      required:
+        - id
+        - courseId
+        - title
+      properties:
+        id:
+          type: string
+        courseId:
+          type: string
+        title:
+          type: string
+
+    TutorQuestionRequest:
+      type: object
+      required:
+        - courseId
+        - question
+      properties:
+        courseId:
+          type: string
+        question:
+          type: string
+
+    TutorQuestionResponse:
+      type: object
+      required:
+        - answer
+      properties:
+        answer:
+          type: string
+        sources:
+          type: array
+          items:
+            type: string
+
+    Error:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+          format: uri
+
+  responses:
+
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: No autorizado
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/Error'
