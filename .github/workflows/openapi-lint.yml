@@ -10,6 +10,7 @@ on:
     paths:
       - 'api/openapi.yaml'
       - '.spectral.yaml'
+      - '.github/workflows/openapi-lint.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,8 +21,13 @@ jobs:
       - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Ejecutar Spectral
-        uses: stoplightio/spectral-action@latest
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
         with:
-          file_glob: 'api/openapi.yaml'
-          spectral_ruleset: '.spectral.yaml'
+          node-version: 24
+
+      - name: Instalar Spectral
+        run: npm install --no-save @stoplight/spectral-cli
+
+      - name: Ejecutar Spectral
+        run: npx spectral lint api/openapi.yaml --ruleset .spectral.yaml
