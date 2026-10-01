@@ -4,15 +4,22 @@ info:
   title: AulaViva API
   version: 1.0.0
   description: API para la gestión de cursos, matrículas, evaluaciones y Tutor IA de AulaViva.
+  contact:
+    name: Equipo AulaViva
+    email: aulaviva@example.com
 
 servers:
   - url: https://api.aulaviva.example.com/api/v1
 
 tags:
   - name: Cursos
+    description: Operaciones relacionadas con los cursos.
   - name: Matrículas
+    description: Operaciones relacionadas con las matrículas.
   - name: Evaluaciones
+    description: Operaciones relacionadas con las evaluaciones.
   - name: Tutor IA
+    description: Operaciones relacionadas con el Tutor IA.
 
 paths:
 
@@ -21,6 +28,8 @@ paths:
       tags:
         - Cursos
       summary: Obtener cursos
+      description: Obtiene la lista de cursos disponibles en AulaViva.
+      operationId: getCourses
       security:
         - bearerAuth: []
       responses:
@@ -39,6 +48,8 @@ paths:
       tags:
         - Cursos
       summary: Crear curso
+      description: Crea un nuevo curso en AulaViva.
+      operationId: createCourse
       security:
         - bearerAuth: []
       requestBody:
@@ -67,6 +78,8 @@ paths:
       tags:
         - Cursos
       summary: Obtener un curso
+      description: Obtiene la información de un curso específico mediante su identificador.
+      operationId: getCourseById
       security:
         - bearerAuth: []
       parameters:
@@ -86,6 +99,8 @@ paths:
       tags:
         - Matrículas
       summary: Matricular usuario en un curso
+      description: Crea una matrícula de un usuario en un curso específico.
+      operationId: createEnrollment
       security:
         - bearerAuth: []
       parameters:
@@ -93,6 +108,7 @@ paths:
         - name: Idempotency-Key
           in: header
           required: true
+          description: Identificador utilizado para evitar la creación duplicada de una matrícula.
           schema:
             type: string
       requestBody:
@@ -120,6 +136,8 @@ paths:
       tags:
         - Evaluaciones
       summary: Crear evaluación
+      description: Crea una nueva evaluación asociada a un curso.
+      operationId: createEvaluation
       security:
         - bearerAuth: []
       requestBody:
@@ -148,6 +166,8 @@ paths:
       tags:
         - Tutor IA
       summary: Realizar una pregunta al Tutor IA
+      description: Envía una pregunta al Tutor IA utilizando información del curso y fuentes disponibles mediante RAG.
+      operationId: askTutorQuestion
       security:
         - bearerAuth: []
       requestBody:
@@ -189,7 +209,7 @@ components:
       name: courseId
       in: path
       required: true
-      description: Identificador del curso
+      description: Identificador del curso.
       schema:
         type: string
 
@@ -312,21 +332,21 @@ components:
   responses:
 
     BadRequest:
-      description: Solicitud inválida
+      description: Solicitud inválida.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Error'
 
     Unauthorized:
-      description: No autorizado
+      description: No autorizado.
       content:
         application/problem+json:
           schema:
             $ref: '#/components/schemas/Error'
 
     NotFound:
-      description: Recurso no encontrado
+      description: Recurso no encontrado.
       content:
         application/problem+json:
           schema:
