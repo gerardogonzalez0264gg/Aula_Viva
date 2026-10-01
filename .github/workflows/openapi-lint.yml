@@ -1,0 +1,33 @@
+name: OpenAPI Spectral Lint
+
+on:
+  push:
+    paths:
+      - 'api/openapi.yaml'
+      - '.spectral.yaml'
+      - '.github/workflows/openapi-lint.yml'
+  pull_request:
+    paths:
+      - 'api/openapi.yaml'
+      - '.spectral.yaml'
+      - '.github/workflows/openapi-lint.yml'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Instalar Spectral
+        run: npm install --no-save @stoplight/spectral-cli
+
+      - name: Ejecutar Spectral
+        run: npx spectral lint api/openapi.yaml --ruleset .spectral.yaml

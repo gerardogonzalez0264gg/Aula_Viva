@@ -1,0 +1,11 @@
+{
+  "name": "@aulaviva/api-client",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "openapi-typescript ../../api/openapi.yaml -o src/api.ts"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.9.1"
+  }
+}

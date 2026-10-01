@@ -1,0 +1,19 @@
+extends:
+  - spectral:oas
+
+rules:
+  operation-description:
+    description: Todas las operaciones deben tener descripción.
+    given: $.paths[*][*]
+    severity: warn
+    then:
+      field: description
+      function: truthy
+
+  operation-summary:
+    description: Todas las operaciones deben tener resumen.
+    given: $.paths[*][*]
+    severity: error
+    then:
+      field: summary
+      function: truthy
