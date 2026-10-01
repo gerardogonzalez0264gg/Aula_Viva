@@ -1,0 +1,40 @@
+name: Generate TypeScript API Client
+
+on:
+  push:
+    paths:
+      - 'api/openapi.yaml'
+      - '.github/workflows/generate-api-client.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias
+        working-directory: packages/api-client
+        run: npm install
+
+      - name: Generar cliente TypeScript
+        working-directory: packages/api-client
+        run: npm run generate
+
+      - name: Guardar cliente generado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/api-client/src/api.ts
+          git diff --cached --quiet || git commit -m "chore: generate TypeScript API client"
+          git push
