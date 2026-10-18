@@ -1,1 +1,137 @@
 
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity "Tenant" as Tenant {
+  * tenant_id : UUID <<PK>>
+  --
+  name : varchar
+  status : varchar
+}
+
+entity "User" as User {
+  * user_id : UUID <<PK>>
+  --
+  email : varchar
+  display_name : varchar
+  status : varchar
+}
+
+entity "Membership" as Membership {
+  * membership_id : UUID <<PK>>
+  --
+  tenant_id : UUID <<FK>>
+  user_id : UUID <<FK>>
+  role : varchar
+}
+
+entity "Course" as Course {
+  * course_id : UUID <<PK>>
+  --
+  tenant_id : UUID <<FK>>
+  teacher_id : UUID <<FK>>
+  name : varchar
+  status : varchar
+}
+
+entity "Enrollment" as Enrollment {
+  * enrollment_id : UUID <<PK>>
+  --
+  course_id : UUID <<FK>>
+  student_id : UUID <<FK>>
+  enrolled_at : timestamp
+}
+
+entity "CourseMaterial" as Material {
+  * material_id : UUID <<PK>>
+  --
+  course_id : UUID <<FK>>
+  title : varchar
+  storage_uri : varchar
+  content_version : int
+}
+
+entity "Evaluation" as Evaluation {
+  * evaluation_id : UUID <<PK>>
+  --
+  course_id : UUID <<FK>>
+  created_by : UUID <<FK>>
+  title : varchar
+  status : varchar
+  due_at : timestamp
+}
+
+entity "Question" as Question {
+  * question_id : UUID <<PK>>
+  --
+  evaluation_id : UUID <<FK>>
+  prompt : text
+  question_type : varchar
+  points : decimal
+}
+
+entity "Attempt" as Attempt {
+  * attempt_id : UUID <<PK>>
+  --
+  evaluation_id : UUID <<FK>>
+  student_id : UUID <<FK>>
+  submitted_at : timestamp
+  status : varchar
+}
+
+entity "Answer" as Answer {
+  * answer_id : UUID <<PK>>
+  --
+  attempt_id : UUID <<FK>>
+  question_id : UUID <<FK>>
+  response : text
+  is_correct : boolean
+  points_awarded : decimal
+}
+
+entity "TutorSession" as TutorSession {
+  * session_id : UUID <<PK>>
+  --
+  tenant_id : UUID <<FK>>
+  course_id : UUID <<FK>>
+  student_id : UUID <<FK>>
+  created_at : timestamp
+}
+
+entity "TutorMessage" as TutorMessage {
+  * message_id : UUID <<PK>>
+  --
+  session_id : UUID <<FK>>
+  role : varchar
+  content : text
+  created_at : timestamp
+}
+
+Tenant ||--o{ Membership
+User ||--o{ Membership
+
+Tenant ||--o{ Course
+User ||--o{ Course : teacher
+
+Course ||--o{ Enrollment
+User ||--o{ Enrollment : student
+
+Course ||--o{ Material
+Course ||--o{ Evaluation
+User ||--o{ Evaluation : creator
+
+Evaluation ||--o{ Question
+Evaluation ||--o{ Attempt
+User ||--o{ Attempt : student
+
+Attempt ||--o{ Answer
+Question ||--o{ Answer
+
+Tenant ||--o{ TutorSession
+Course ||--o{ TutorSession
+User ||--o{ TutorSession : student
+TutorSession ||--o{ TutorMessage
+
+@enduml
+
