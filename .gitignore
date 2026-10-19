@@ -1,0 +1,15 @@
+# Carpetas que NO se suben a Git
+node_modules/
+coverage/
+__pycache__/
+*.pyc
+.venv/
+
+# Claves y configuracion privada
+.env
+.env.*
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
