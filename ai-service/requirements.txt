@@ -1,0 +1,2 @@
+# Aqui se anotan las librerias de Python que use el servicio IA.
+# Por ahora no necesita ninguna.
