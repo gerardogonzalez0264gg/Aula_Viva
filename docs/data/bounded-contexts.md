@@ -1,49 +1,56 @@
-# Bounded Contexts — AulaViva
+# Bounded Contexts - AulaViva
 
-## 1. Objetivo
+Un "bounded context" es una zona del sistema donde las palabras tienen un solo significado.
+En AulaViva la palabra **"estudiante"** no significa lo mismo en todas partes,
+por eso separamos el sistema en 4 zonas.
 
-Separar el sistema AulaViva en contextos con responsabilidades claras para gestionar colegios, usuarios, cursos, evaluaciones y tutoría mediante inteligencia artificial.
+## 1. Identidad y Colegios
 
-## 2. Contextos del sistema
+- **Qué hace:** guarda los colegios (tenants), los usuarios y el consentimiento de los apoderados.
+- **Qué significa "estudiante" aquí:** una persona con cuenta, un colegio y (si es menor) el permiso firmado por su apoderado.
+- **Dato principal:** `School` (colegio con sus usuarios).
+- **Motor de datos:** PostgreSQL.
 
-### Identidad y Tenants
-- Responsabilidad: gestionar colegios, usuarios, roles y membresías.
-- Entidades principales: Tenant, User y Membership.
-- Evento: `user.registered`.
+## 2. Académico
 
-### Gestión Académica
-- Responsabilidad: gestionar cursos, estudiantes, matrículas y materiales.
-- Entidades principales: Course, Enrollment y CourseMaterial.
-- Evento: `course.created`.
+- **Qué hace:** maneja los cursos, las matrículas y los apuntes que sube el docente.
+- **Qué significa "estudiante" aquí:** alguien matriculado en un curso.
+- **Dato principal:** `Course` (curso con sus matrículas y apuntes).
+- **Motor de datos:** PostgreSQL.
 
-### Evaluaciones
-- Responsabilidad: crear evaluaciones, recibir respuestas y calcular resultados.
-- Entidades principales: Evaluation, Question, Attempt y Answer.
-- Evento: `evaluation.published`.
+## 3. Evaluaciones
 
-### Tutor IA
-- Responsabilidad: responder preguntas utilizando los materiales autorizados de los cursos.
-- Entidades principales: TutorSession y TutorMessage.
-- Evento: `tutor.answer.generated`.
+- **Qué hace:** crea evaluaciones, recibe las respuestas, las corrige solas y entrega resultados y feedback.
+- **Qué significa "estudiante" aquí:** quien responde una evaluación y recibe una nota.
+- **Dato principal:** `Evaluation` (evaluación con sus preguntas y respuestas enviadas).
+- **Motor de datos:** PostgreSQL.
 
-### Analítica y Seguimiento
-- Responsabilidad: consultar resultados y medir el progreso de los estudiantes.
-- Entidades principales: StudentProgress y LearningMetric.
-- Evento: `progress.updated`.
+## 4. Tutor IA
 
-## 3. Relaciones entre contextos
+- **Qué hace:** responde preguntas usando los apuntes del curso (RAG) y mide cuántos tokens gasta cada colegio.
+- **Qué significa "estudiante" aquí:** quien hace una pregunta al tutor. Solo se guarda una referencia, no sus datos personales.
+- **Dato principal:** `TutorSession` (conversación con el tutor).
+- **Motor de datos:** PostgreSQL con pgvector (guarda los textos de los apuntes para buscarlos).
 
-- Identidad proporciona los usuarios y roles.
-- Gestión Académica proporciona cursos y matrículas.
-- Evaluaciones utiliza los cursos para crear pruebas y registrar resultados.
-- Tutor IA utiliza los materiales autorizados para responder preguntas.
-- Analítica recibe eventos para actualizar indicadores y mostrar el progreso.
+## Mapa de contexto (cómo se hablan)
 
-## 4. Decisiones
+```mermaid
+flowchart LR
+    ID[Identidad y Colegios]
+    AC[Académico]
+    EV[Evaluaciones]
+    TU[Tutor IA]
 
-- PostgreSQL será la base de datos principal.
-- Los contextos compartirán identificadores, evitando depender directamente de los modelos internos de otros contextos.
-- Los datos de cada colegio estarán aislados mediante `tenant_id`.
-- Se utilizará el patrón Outbox para publicar eventos de forma fiable.
-- No se implementará Event Sourcing completo en la primera versión.
-- Los consumidores de eventos deberán evitar procesar dos veces el mismo evento.
+    ID -- "user.account.created" --> AC
+    AC -- "enrollment.user.enrolled" --> EV
+    AC -- "notes.file.uploaded" --> TU
+    EV -- "evaluation.draft.requested" --> TU
+    TU -- "evaluation.draft.generated" --> EV
+    ID -- "guardian.consent.recorded" --> TU
+```
+
+## Reglas simples
+
+- Una zona no lee las tablas de otra. Se comunican por eventos o por la API.
+- Todas las tablas y eventos llevan `tenant_id`, para que un colegio nunca vea datos de otro.
+- Las 4 zonas viven dentro del mismo monolito modular (ADR 0002), pero cada una es un módulo separado.
