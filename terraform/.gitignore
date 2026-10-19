@@ -1,0 +1,5 @@
+# Nunca subir el estado ni carpetas internas de Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
