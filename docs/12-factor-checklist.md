@@ -65,12 +65,12 @@ Frontend (React), Backend (Node.js), Base de Datos (PostgreSQL), Servicio IA (Py
 **Acción:** Definir cómo se ejecutarán tareas puntuales (migraciones de base de datos, scripts) como procesos aparte, separados del proceso principal.
 **Responsable:** Backend Lead
 
----
-
 ## Resumen
 
-| Estado | Cantidad |
-|---|---|
-| Cumple | 2 |
-| No cumple | 4 |
-|
+| Estado | Cantidad | Factores |
+|---|---|---|
+| Cumple | 2 | 1, 7 |
+| Diseño planificado | 4 | 2, 4, 6, 10 |
+| No cumple | 4 | 3, 5, 9, 11 |
+| No aplica todavía | 2 | 8, 12 |
+| **Total** | **12** | |
