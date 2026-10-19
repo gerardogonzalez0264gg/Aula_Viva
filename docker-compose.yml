@@ -1,0 +1,36 @@
+# Levanta todo en tu computador para probar.
+# Uso:  docker compose up --build
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: aulaviva
+      POSTGRES_USER: aulaviva
+      POSTGRES_PASSWORD: clave-solo-para-pruebas
+    ports:
+      - "5432:5432"
+    volumes:
+      - datos-db:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    environment:
+      PORT: "8080"
+      APP_ENV: local
+      AI_SERVICE_URL: http://ai-service:8080
+      DATABASE_URL: postgres://aulaviva:clave-solo-para-pruebas@db:5432/aulaviva
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - ai-service
+
+  ai-service:
+    build: ./ai-service
+    environment:
+      PORT: "8080"
+    ports:
+      - "8081:8080"
+
+volumes:
+  datos-db:
