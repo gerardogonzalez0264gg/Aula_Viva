@@ -1,0 +1,17 @@
+# Configuracion que NO es secreta (se puede ver sin problema)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aulaviva-config
+  namespace: aulaviva
+data:
+  APP_ENV: "dev"
+  PORT: "8080"
+  LOG_LEVEL: "info"
+  AI_SERVICE_URL: "http://ai-service:8080"
+  DB_HOST: "postgres.aulaviva.svc.cluster.local"
+  DB_PORT: "5432"
+  DB_NAME: "aulaviva"
+  PUBSUB_TOPIC_EVENTS: "aulaviva-eventos"
+  LLM_MODEL_NAME: "modelo-gestionado"
+  MAX_TOKENS_POR_COLEGIO: "200000"
