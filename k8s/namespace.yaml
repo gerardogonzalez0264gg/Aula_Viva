@@ -1,0 +1,5 @@
+# Un "espacio" separado dentro del cluster solo para AulaViva
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aulaviva

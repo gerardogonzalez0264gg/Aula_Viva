@@ -1,0 +1,21 @@
+# Puerta de entrada desde fuera del cluster.
+# Solo el backend se publica; el servicio IA queda interno.
+# Necesita un "ingress controller" instalado (por ejemplo nginx).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aulaviva
+  namespace: aulaviva
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aulaviva.local
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend
+                port:
+                  number: 8080
