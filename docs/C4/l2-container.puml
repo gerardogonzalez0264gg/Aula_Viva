@@ -8,9 +8,11 @@ System_Boundary(aulaviva, "AulaViva") {
 
     Container(frontend, "Frontend Web", "React (Vercel)", "Interfaz de estudiantes y docentes")
 
-    Container(backend, "Backend", "Node.js (Cloud Run)", "Gestiona usuarios, cursos y evaluaciones")
+    Container(backend, "Backend", "Node.js (Cloud Run)", "Gestiona usuarios, cursos y evaluaciones. Guarda los eventos en la tabla outbox")
 
-    ContainerDb(db, "Base de Datos", "PostgreSQL (Cloud SQL)", "Almacena usuarios, cursos y evaluaciones")
+    ContainerDb(db, "Base de Datos", "PostgreSQL + pgvector (Cloud SQL)", "Almacena usuarios, cursos, evaluaciones, tabla outbox y apuntes para el tutor")
+
+    ContainerQueue(broker, "Broker de eventos", "Google Pub/Sub", "Reparte los eventos del sistema")
 
     Container(ai, "Servicio IA", "Python / RAG (Cloud Run + Vertex AI)", "Tutor IA y generación de evaluaciones")
 }
@@ -22,6 +24,9 @@ Rel(docente, frontend, "Utiliza")
 
 Rel(frontend, backend, "Solicita información")
 Rel(backend, db, "Lee y escribe")
+Rel(backend, broker, "Publica eventos (desde outbox)")
+Rel(broker, ai, "Entrega eventos (apuntes nuevos, evaluaciones por generar)")
 Rel(backend, ai, "Solicita funciones de IA")
+Rel(ai, db, "Busca apuntes (pgvector)")
 Rel(ai, llm, "Consulta")
 @enduml

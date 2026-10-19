@@ -1,84 +1,72 @@
-# ADR 0004: Datos y arquitecturas event-driven
+# ADR 0004: Datos y eventos
 
-- **Estado:** Propuesta
-- **Fecha:** 18-10-2026
-- **Proyecto:** AulaViva
+## Contexto
 
-## 1. Contexto
+AulaViva guarda cursos, matrículas, evaluaciones, resultados y apuntes para el tutor IA.
+Además, algunas cosas pasan "en cadena": cuando un estudiante envía una evaluación,
+hay que corregirla, generar el feedback y actualizar el panel del docente.
+Era necesario decidir dónde se guardan los datos y cómo se avisan entre sí los módulos.
+Todo debe respetar el aislamiento entre colegios y la protección de datos de menores.
 
-AulaViva es una plataforma educativa que administra colegios, usuarios, cursos, materiales, evaluaciones y un tutor IA.
+## Alternativas
 
-El sistema necesita mantener la integridad de las matrículas y los resultados, aislar los datos de cada colegio y permitir que sus componentes se comuniquen de forma asíncrona.
+**Base de datos**
+- PostgreSQL para todo.
+- PostgreSQL + base documental (MongoDB) para los apuntes y el tutor IA.
+- PostgreSQL + base especializada en vectores (Pinecone o Qdrant).
 
-## 2. Decisión de persistencia
+**Aviso entre módulos (broker)**
+- Google Pub/Sub.
+- Kafka.
+- RabbitMQ.
 
-Se utilizará PostgreSQL como fuente de verdad principal porque permite transacciones ACID, relaciones entre entidades, integridad referencial y consultas complejas.
+**Patrones**
+- Outbox, CQRS, Event Sourcing y Saga.
 
-Los datos principales serán:
-- Usuarios, colegios y membresías.
-- Cursos, matrículas y materiales.
-- Evaluaciones, preguntas, intentos y respuestas.
-- Sesiones y mensajes del tutor.
+## Decisión
 
-Redis podrá incorporarse como caché si las mediciones demuestran que es necesario.
+- **Base de datos:** una sola base **PostgreSQL** (Cloud SQL). Para el tutor IA se usa la extensión **pgvector**,
+  que guarda los textos de los apuntes dentro de la misma base.
+- **Aislamiento entre colegios:** todas las tablas llevan `tenant_id` y se filtran por él.
+- **Broker de eventos:** **Google Pub/Sub** (servicio gestionado).
+- **Outbox: sí.** Cada evento se guarda en la tabla `outbox_event` junto con el dato, y luego se publica.
+- **CQRS: no por ahora.** Una sola forma de leer y escribir es suficiente para el MVP.
+- **Event Sourcing: no.** No necesitamos reconstruir el pasado completo con eventos.
+- **Saga: no por ahora.** El monolito modular guarda todo en una sola base, así que no hay transacciones repartidas.
+- **Eventos repetidos:** se asume que un evento puede llegar dos veces. Quien lo recibe revisa el `event_id`.
 
-## 3. Decisión sobre eventos
+## Justificación
 
-Se propone Cloud Pub/Sub como broker de eventos administrado, sujeto a que el despliegue utilice Google Cloud y a la validación de costos.
+- Es mejor empezar con PostgreSQL y agregar algo nuevo solo cuando se demuestre que no alcanza.
+- pgvector evita operar otra base y mantiene los apuntes de cada colegio junto a sus demás datos y con el mismo `tenant_id`.
+- Pub/Sub encaja con Cloud Run y Vertex AI (ADR 0003): no hay servidores que mantener y se paga por uso.
+- Outbox es barato de hacer y evita perder eventos si el broker falla justo después de guardar el dato.
+- CQRS y Event Sourcing agregarían mucha complejidad y no resuelven un problema que hoy tengamos.
 
-Los eventos comunicarán hechos ocurridos en el sistema, como la publicación de una evaluación o la generación de un resultado.
+## Consecuencias positivas
 
-Se utilizará Transactional Outbox para registrar los eventos junto con los cambios de negocio en una misma transacción PostgreSQL.
+- Menos piezas que operar: una base y un broker.
+- Los datos de cada colegio quedan aislados con un criterio simple (`tenant_id`).
+- Los eventos no se pierden y se pueden seguir con el `trace_id`.
+- Se puede medir el uso de tokens por colegio con el evento `tutor.usage.recorded`.
 
-## 4. Patrones seleccionados
+## Consecuencias negativas
 
-### Outbox
-Se elige para evitar que una modificación en la base de datos se confirme sin que quede registrado el evento que debe publicarse.
+- Hay que crear y mantener la tabla `outbox_event` y el proceso que publica.
+- pgvector puede quedarse corto si los apuntes crecen mucho; habría que migrar a una base de vectores.
+- Todos los que reciben eventos deben ser capaces de ignorar los repetidos.
+- Una sola base es un punto único de falla (se reduce con la alta disponibilidad de Cloud SQL).
 
-### CQRS
-Se utilizará solo cuando las consultas necesiten un modelo de lectura distinto del modelo de escritura. Inicialmente se mantendrán consultas simples sobre PostgreSQL.
+## Documentos relacionados
 
-### Event Sourcing
-No se implementará en el MVP. La complejidad adicional no se justifica sin una necesidad concreta de reconstrucción completa del estado a partir de eventos.
+- `docs/data/der.png` y `docs/data/der.dbml`
+- `docs/data/event-catalog.md`
+- `docs/data/bounded-contexts.md`
 
-### Saga
-Se considerará si aparecen operaciones distribuidas que involucren varios servicios y necesiten acciones compensatorias ante fallos.
+## Fecha
 
-## 5. Bounded contexts
+19-10-2026
 
-El sistema se dividirá en Identidad y Tenants, Gestión Académica, Evaluaciones, Tutor IA y Analítica y Seguimiento.
+## Autor
 
-Durante el MVP estos contextos podrán implementarse como módulos del backend, sin necesidad de convertirlos inmediatamente en microservicios.
-
-## 6. Alternativas consideradas
-
-| Alternativa | Ventaja | Desventaja | Decisión |
-|---|---|---|---|
-| PostgreSQL | Transacciones y relaciones | Requiere diseñar índices | Elegido |
-| MongoDB | Documentos flexibles | Menos adecuado como núcleo relacional del dominio | No elegido |
-| Redis | Acceso rápido por clave | No será la fuente principal de verdad | Solo caché si se necesita |
-| Kafka | Streaming y reproducción de eventos | Mayor complejidad operacional | Evaluar en el futuro |
-| Cloud Pub/Sub | Servicio administrado | Dependencia de Google Cloud y costos variables | Propuesto |
-| Event Sourcing | Reconstrucción del estado | Mayor complejidad | No en el MVP |
-
-## 7. Consecuencias
-
-### Positivas
-- Integridad de los datos académicos.
-- Comunicación asíncrona entre componentes.
-- Menor acoplamiento entre contextos.
-- Posibilidad de escalar componentes cuando sea necesario.
-
-### Negativas
-- Outbox necesita un proceso relay y reintentos.
-- La entrega de eventos puede ser duplicada.
-- Algunas vistas pueden actualizarse con retraso.
-- La seguridad multi-tenant requiere validación en todas las operaciones.
-
-## 8. Validación
-
-- Verificar las relaciones del DER.
-- Comprobar que un colegio no pueda consultar los datos de otro.
-- Probar reintentos de publicación Outbox.
-- Verificar que un consumidor no procese dos veces el mismo evento.
-- Revisar costos y necesidades reales antes de incorporar tecnologías adicionales.
+Gerardo González
