@@ -5,7 +5,8 @@ FROM python:3.11-slim-bookworm AS build
 WORKDIR /app
 
 COPY requirements.txt .
-RUN pip install --prefix=/install --no-cache-dir -r requirements.txt
+# Se crea la carpeta primero, para que exista aunque no haya librerias que instalar
+RUN mkdir -p /install && pip install --prefix=/install --no-cache-dir -r requirements.txt
 
 # ---------- Etapa 2: la imagen final ----------
 # Imagen "distroless": sin shell ni herramientas extra, mas liviana y segura

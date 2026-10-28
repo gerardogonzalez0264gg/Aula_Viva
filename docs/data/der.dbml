@@ -1,0 +1,73 @@
+Table tenant {
+  id uuid [pk]
+  name text
+  region text
+}
+
+Table user {
+  id uuid [pk]
+  tenant_id uuid
+  email text
+  role text
+  guardian_consent boolean
+}
+
+Table course {
+  id uuid [pk]
+  tenant_id uuid
+  teacher_id uuid
+  name text
+  description text
+}
+
+Table enrollment {
+  id uuid [pk]
+  tenant_id uuid
+  user_id uuid
+  course_id uuid
+  idempotency_key text
+}
+
+Table evaluation {
+  id uuid [pk]
+  tenant_id uuid
+  course_id uuid
+  title text
+  status text
+}
+
+Table question {
+  id uuid [pk]
+  tenant_id uuid
+  evaluation_id uuid
+  statement text
+  correct_answer text
+}
+
+Table submission {
+  id uuid [pk]
+  tenant_id uuid
+  evaluation_id uuid
+  student_id uuid
+  score numeric
+  submitted_at timestamp
+}
+
+Table outbox_event {
+  id uuid [pk]
+  tenant_id uuid
+  event_type text
+  payload jsonb
+  published boolean
+}
+
+Ref: user.tenant_id > tenant.id
+Ref: course.tenant_id > tenant.id
+Ref: course.teacher_id > user.id
+Ref: enrollment.user_id > user.id
+Ref: enrollment.course_id > course.id
+Ref: evaluation.course_id > course.id
+Ref: question.evaluation_id > evaluation.id
+Ref: submission.evaluation_id > evaluation.id
+Ref: submission.student_id > user.id
+Ref: outbox_event.tenant_id > tenant.id

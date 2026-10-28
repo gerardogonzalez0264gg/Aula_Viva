@@ -14,29 +14,29 @@ spec:
       labels: { app: backend, proyecto: aulaviva }
     spec:
       securityContext:
-        runAsNonRoot: true            # no correr como administrador
+        runAsNonRoot: true
+        runAsUser: 65532
       containers:
         - name: backend
-          # Para la entrega, reemplaza ":0.1.0" por el digest: @sha256:...
-          image: ghcr.io/gerardogonzalez0264gg/aulaviva-backend:0.1.0
+          image: ghcr.io/gerardogonzalez0264gg/aulaviva-backend@sha256:829b0427109745a3a0f958318f58b3fcf0c0996b4a0321a3a63721299ad81b5d
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef: { name: aulaviva-config }
-            - secretRef:    { name: aulaviva-secrets, optional: true }
+            - secretRef: { name: aulaviva-secrets, optional: true }
           resources:
-            requests: { cpu: "100m", memory: "128Mi" }   # lo minimo que necesita
-            limits:   { cpu: "500m", memory: "256Mi" }   # lo maximo que puede usar
-          readinessProbe:             # pregunta "estas listo para recibir gente?"
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "256Mi" }
+          readinessProbe:
             httpGet: { path: /ready, port: 8080 }
             initialDelaySeconds: 3
             periodSeconds: 5
-          livenessProbe:              # pregunta "sigues vivo?"
+          livenessProbe:
             httpGet: { path: /health, port: 8080 }
             initialDelaySeconds: 10
             periodSeconds: 10
 ---
-# Servicio IA: va aparte porque escala distinto (ADR 0003)
+# Servicio IA
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -53,17 +53,18 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        runAsUser: 65532
       containers:
         - name: ai-service
-          image: ghcr.io/gerardogonzalez0264gg/aulaviva-ai-service:0.1.0
+          image: ghcr.io/gerardogonzalez0264gg/aulaviva-ai-service@sha256:a7081c8c60594650065999f0533d09bf7c843be9b8b6be0285078e76a3a936c4
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef: { name: aulaviva-config }
-            - secretRef:    { name: aulaviva-secrets, optional: true }
+            - secretRef: { name: aulaviva-secrets, optional: true }
           resources:
             requests: { cpu: "200m", memory: "256Mi" }
-            limits:   { cpu: "1",    memory: "512Mi" }
+            limits: { cpu: "1", memory: "512Mi" }
           readinessProbe:
             httpGet: { path: /ready, port: 8080 }
             initialDelaySeconds: 3
