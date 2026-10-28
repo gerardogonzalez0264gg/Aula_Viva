@@ -14,11 +14,12 @@ spec:
       labels: { app: backend, proyecto: aulaviva }
     spec:
       securityContext:
-        runAsNonRoot: true            # no correr como administrador
+        runAsNonRoot: true
+        runAsUser: 65532
       containers:
         - name: backend
           # Para la entrega, reemplaza ":0.1.0" por el digest: @sha256:...
-          image: ghcr.io/TU_USUARIO/aulaviva-backend:0.1.0
+          image: ghcr.io/gerardogonzalez0264gg/aulaviva-backend:0.1.0
           ports:
             - containerPort: 8080
           envFrom:
@@ -53,9 +54,10 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
+        runAsUser: 65532
       containers:
         - name: ai-service
-          image: ghcr.io/TU_USUARIO/aulaviva-ai-service:0.1.0
+          image: ghcr.io/gerardogonzalez0264gg/aulaviva-ai-service:0.1.0
           ports:
             - containerPort: 8080
           envFrom:
