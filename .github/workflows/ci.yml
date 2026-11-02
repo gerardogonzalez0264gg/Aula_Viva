@@ -87,7 +87,7 @@ jobs:
           token: ${{ secrets.GITOPS_TOKEN }}
 
       - name: Cambiar la version de las imagenes
-                run: |
+        run: |
           sed -i "s/newTag: .*/newTag: ${{ github.sha }}/" overlays/dev/kustomization.yaml
 
       - name: Crear el pull request
