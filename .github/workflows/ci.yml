@@ -1,4 +1,4 @@
-# Pipeline de AulaViva: revisa el código, construye las imágenes y las promueve al repo GitOps
+# Pipeline de AulaViva: revisa el codigo, construye las imagenes y las promueve al repo GitOps
 name: ci-aulaviva
 
 on:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  # 1) Revisa el código: orden (lint) y pruebas con cobertura mínima 70%
+  # 1) Revisa el codigo: orden (lint) y pruebas con cobertura minima 70%
   quality:
     runs-on: ubuntu-latest
     defaults:
@@ -30,10 +30,10 @@ jobs:
       - name: Lint (si falla, se detiene todo)
         run: npm run lint
 
-      - name: Pruebas y cobertura (mínimo 70%)
+      - name: Pruebas y cobertura (minimo 70%)
         run: npm test
 
-  # 2) Revisa la seguridad del código con Semgrep (falla si hay hallazgos graves)
+  # 2) Revisa la seguridad del codigo con Semgrep (falla si hay hallazgos graves)
   sast:
     runs-on: ubuntu-latest
     container:
@@ -45,7 +45,7 @@ jobs:
       - name: Semgrep
         run: semgrep scan --config p/default --severity ERROR --error
 
-  # 3) Construye y publica las imágenes en GHCR (solo cuando se une a main)
+  # 3) Construye y publica las imagenes en GHCR (solo cuando se une a main)
   build-and-push:
     needs: [quality, sast]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -74,7 +74,7 @@ jobs:
           push: true
           tags: ghcr.io/gerardogonzalez0264gg/aulaviva-${{ matrix.servicio }}:${{ github.sha }}
 
-  # 4) Abre un pull request en el repo GitOps con la versión nueva
+  # 4) Abre un pull request en el repo GitOps con la version nueva
   promote-to-gitops:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -86,7 +86,7 @@ jobs:
           repository: gerardogonzalez0264gg/aulaviva-gitops
           token: ${{ secrets.GITOPS_TOKEN }}
 
-      - name: Cambiar la versión de las imágenes
+      - name: Cambiar la version de las imagenes
         run: sed -i "s/newTag: .*/newTag: ${{ github.sha }}/" overlays/dev/kustomization.yaml
 
       - name: Crear el pull request
@@ -96,6 +96,6 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git checkout -b release-${GITHUB_SHA::7}
-          git commit -am "Nueva versión ${GITHUB_SHA::7}"
+          git commit -am "Nueva version ${GITHUB_SHA::7}"
           git push origin HEAD
-          gh pr create --title "Nueva versión ${GITHUB_SHA::7}" --body "Pipeline automático de AulaViva"
+          gh pr create --title "Nueva version ${GITHUB_SHA::7}" --body "Pipeline automatico de AulaViva"

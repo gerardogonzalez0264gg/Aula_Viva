@@ -1,4 +1,4 @@
-# ADR 0005: Estrategia GitOps para desplegar AulaViva
+﻿# ADR 0005: Estrategia GitOps para desplegar AulaViva
 
 ## Contexto
 
@@ -23,7 +23,7 @@ Falta decidir cómo se despliegan los cambios al cluster y cómo se revisan ante
 ## Decisión
 
 - **Pull (GitOps)** con **Argo CD**.
-- Dos repos: uno con el código (`AulaViva`) y otro con los manifiestos (`aulaviva-gitops`), con Kustomize `base` + `overlays/dev` y `overlays/prod`.
+- Dos repos: uno con el código (`Aula_Viva`) y otro con los manifiestos (`aulaviva-gitops`), con Kustomize `base` + `overlays/dev` y `overlays/prod`.
 - El pipeline publica la imagen y abre un pull request en el repo GitOps; al aprobarlo, Argo CD actualiza el cluster.
 - **GitHub Flow** con `main` protegida: pull request obligatorio, 2 revisores y checks en verde.
 
