@@ -85,42 +85,6 @@ kubectl apply -k k8s/
 kubectl get all -n aulaviva
 ```
 
-Resultado de `kubectl get all -n aulaviva`:
-
-![kubectl get all](docs/img/kubectl-get-all.png)
-
-Autoescalado (HPA):
-
-![HPA](docs/img/hpa.png)
-
-Terraform:
-
-![Terraform](docs/img/terraform-apply.png)
-
-Decisiones: ver `docs/adr/0005-plataforma-k8s.md`.
-
-## CI/CD y GitOps (S08)
-
-- El pipeline está en `.github/workflows/ci.yml` (revisión de código, pruebas con 70% de cobertura, Semgrep e imágenes en GHCR).
-- Los manifiestos de despliegue viven en el repositorio `aulaviva-gitops` y Argo CD los aplica solo.
-- Decisiones: ver `docs/adr/0005-gitops-strategy.md`.
-
-Pipeline en verde en `main`:
-
-![Pipeline en verde](docs/img/actions-verde.png)
-
-Argo CD con la aplicación en Synced/Healthy:
-
-![Argo CD](docs/img/argocd-synced.png)
-
-Árbol de recursos en Argo CD (todo en verde):
-
-![Árbol de Argo CD](docs/img/argocd-arbol.png)
-
-Protección de la rama `main` (2 aprobaciones y checks obligatorios):
-
-![Ruleset](docs/img/ruleset-main.png)
-
 ## Decisiones de arquitectura (ADR)
 
 | ADR | Tema |
