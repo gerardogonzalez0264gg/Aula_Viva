@@ -1,0 +1,13 @@
+
+rules:
+  - id: aulaviva-hardcoded-jwt-secret
+    message: "Posible secreto JWT escrito directamente en el código. Utiliza una variable de entorno."
+    severity: ERROR
+    languages:
+      - javascript
+    patterns:
+      - pattern: jwt.sign($PAYLOAD, "$SECRET", ...)
+    metadata:
+      category: security
+      technology:
+        - javascript
