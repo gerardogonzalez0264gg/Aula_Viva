@@ -53,6 +53,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
 
+      - name: Install API client dependencies
+        working-directory: packages/api-client
+        run: npm install
+
       - name: Install CycloneDX generator
         run: npm install -g @cyclonedx/cyclonedx-npm
 
