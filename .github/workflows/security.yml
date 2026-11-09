@@ -53,14 +53,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
 
+      - name: Install CycloneDX generator
+        run: npm install -g @cyclonedx/cyclonedx-npm
+
       - name: Generate CycloneDX SBOM
-        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: cyclonedx
-          output: sbom.json
-          exit-code: '0'
+        working-directory: packages/api-client
+        run: cyclonedx-npm --output-file ../../sbom.json
 
       - name: Upload SBOM
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
