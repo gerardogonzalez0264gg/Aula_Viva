@@ -6,12 +6,17 @@ on:
       - 'api/openapi.yaml'
       - '.spectral.yaml'
       - '.github/workflows/openapi-lint.yml'
+
   pull_request:
     paths:
       - 'api/openapi.yaml'
       - '.spectral.yaml'
       - '.github/workflows/openapi-lint.yml'
+
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -19,10 +24,10 @@ jobs:
 
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24
 

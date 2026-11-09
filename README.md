@@ -96,6 +96,61 @@ kubectl get all -n aulaviva
 | 0005 | Contenedores, Kubernetes e IaC |
 | 0005 (GitOps) | Estrategia GitOps con Argo CD |
 
+
+---
+
+## Seguridad y DevSecOps - Clase 9
+
+AulaViva incorpora controles de seguridad automatizados
+para detectar vulnerabilidades durante el desarrollo.
+
+### Herramientas utilizadas
+
+- **Semgrep (SAST):** análisis estático del código.
+- **Trivy (SCA):** detección de vulnerabilidades en dependencias.
+- **Gitleaks:** detección de secretos expuestos.
+- **CycloneDX:** generación del inventario SBOM.
+
+### Pipeline de seguridad
+
+El workflow `.github/workflows/security.yml`
+ejecuta los siguientes controles:
+
+1. Análisis SAST con Semgrep.
+2. Análisis SCA con Trivy.
+3. Generación del SBOM en formato CycloneDX.
+4. Detección de secretos con Gitleaks.
+
+El SBOM se publica como artefacto de GitHub Actions.
+
+### Reglas personalizadas
+
+Las reglas propias de Semgrep se encuentran en:
+
+- `.semgrep/javascript-security.yml`
+- `.semgrep/python-security.yml`
+
+### Modelo de amenazas
+
+El análisis STRIDE de AulaViva se encuentra en:
+
+`docs/threat-model.md`
+
+Este documento identifica amenazas relacionadas con
+la suplantación, modificación de datos, repudiación,
+divulgación de información, denegación de servicio
+y elevación de privilegios.
+
+### Gestión de hallazgos
+
+Los hallazgos HIGH y CRITICAL deben investigarse
+y corregirse cuando corresponda.
+
+Cuando una vulnerabilidad no aplique al contexto
+del proyecto, se debe documentar la justificación
+y su evaluación antes de solicitar una excepción.
+
+
 ## Autor
 
 Gerardo González

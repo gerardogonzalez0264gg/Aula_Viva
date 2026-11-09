@@ -1,4 +1,4 @@
-# Pipeline de AulaViva: revisa el codigo, construye las imagenes y las promueve al repo GitOps
+# Pipeline de AulaViva
 name: ci-aulaviva
 
 on:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  # 1) Revisa el codigo: orden (lint) y pruebas con cobertura minima 70%
+  # 1. Calidad del código
   quality:
     runs-on: ubuntu-latest
     defaults:
@@ -15,10 +15,10 @@ jobs:
         working-directory: backend
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Configurar Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 20
           cache: npm
@@ -27,25 +27,25 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Lint (si falla, se detiene todo)
+      - name: Lint
         run: npm run lint
 
-      - name: Pruebas y cobertura (minimo 70%)
+      - name: Pruebas y cobertura
         run: npm test
 
-  # 2) Revisa la seguridad del codigo con Semgrep (falla si hay hallazgos graves)
+  # 2. Análisis de seguridad SAST
   sast:
     runs-on: ubuntu-latest
     container:
       image: semgrep/semgrep
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Semgrep
         run: semgrep scan --config p/default --severity ERROR --error
 
-  # 3) Construye y publica las imagenes en GHCR (solo cuando se une a main)
+  # 3. Construcción y publicación de imágenes
   build-and-push:
     needs: [quality, sast]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -58,30 +58,30 @@ jobs:
         servicio: [backend, ai-service]
     steps:
       - name: Descargar repositorio
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Entrar a GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Construir y subir la imagen
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: ./${{ matrix.servicio }}
           push: true
           tags: ghcr.io/gerardogonzalez0264gg/aulaviva-${{ matrix.servicio }}:${{ github.sha }}
 
-  # 4) Abre un pull request en el repo GitOps con la version nueva
+  # 4. Promoción al repositorio GitOps
   promote-to-gitops:
     needs: build-and-push
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - name: Descargar el repo GitOps
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: gerardogonzalez0264gg/aulaviva-gitops
           token: ${{ secrets.GITOPS_TOKEN }}

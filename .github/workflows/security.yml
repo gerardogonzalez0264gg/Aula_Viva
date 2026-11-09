@@ -1,0 +1,88 @@
+name: AulaViva Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  sast:
+    name: SAST - Semgrep
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+
+      - name: Install Semgrep
+        run: python -m pip install semgrep
+
+      - name: Analyze code
+        run: semgrep scan --config p/owasp-top-ten --config .semgrep --error
+
+  sca:
+    name: SCA - Trivy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - name: Scan dependencies
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+
+      - name: Install API client dependencies
+        working-directory: packages/api-client
+        run: npm install
+
+      - name: Install CycloneDX generator
+        run: npm install -g @cyclonedx/cyclonedx-npm
+
+      - name: Generate CycloneDX SBOM
+        working-directory: packages/api-client
+        run: cyclonedx-npm --output-file ../../sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: aulaviva-sbom-cyclonedx
+          path: sbom.json
+          if-no-files-found: error
+          retention-days: 90
+
+  secrets:
+    name: Secret Scanning - Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+        with:
+          fetch-depth: 0
+
+      - name: Detect exposed secrets
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
