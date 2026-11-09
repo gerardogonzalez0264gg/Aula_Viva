@@ -1,0 +1,16 @@
+
+rules:
+  - id: aulaviva-python-hardcoded-password
+    message: "Posible contraseña escrita directamente en el código."
+    severity: ERROR
+    languages:
+      - python
+    patterns:
+      - pattern: $X = "..."
+      - metavariable-regex:
+          metavariable: $X
+          regex: (?i)(password|passwd|secret|api_key)
+    metadata:
+      category: security
+      technology:
+        - python
